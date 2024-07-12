@@ -16,8 +16,12 @@
 ;;
 
 ;;; Code:
+(require 'panoply-utils)
 (require 'panoply-command)
 (require 'panoply-self)
+(require 'subr-x)
+(require 'dom)
+
 
 (defun panoply--parse-addresses (addresses)
   "Parse ADDRESSES into plists."
@@ -127,18 +131,36 @@ Also can take :all, or nil."
 			  (:all "-A"))
 			ip "-Pn")
 		     (panoply-command/nmap ip "-Pn")))
-	 (hosts (panoply--parse-host (car (dom-by-tag response 'host))))
+	 (host (panoply--parse-host (car (dom-by-tag response 'host))))
 	 (ports (panoply--parse-ports (car (dom-by-tag response 'ports))))
 	 (os (panoply--parse-os (car (dom-by-tag response 'os))))
-	 (hints (panoply--parse-host (car (dom-by-tag response 'hosthint)))))
-    (list :hosts hosts :ports ports :os os :hints hints)))
+	 (hint (panoply--parse-host (car (dom-by-tag response 'hosthint)))))
+    (list :host host :ports ports :os os :hint hint)))
+
+(defun panoply--local-mac-address-lookup (config address)
+  "Get names for device with ADDRESS from CONFIG."
+  (if config
+      (cl-destructuring-bind (&key mac &allow-other-keys)
+	  address
+	(let ((devices (gethash "devices" config))
+	      (normal-mac (panoply-utils/normalize-mac-address mac)))
+	  (if-let ((new-info (gethash normal-mac devices)))
+	      (prog1
+		(setq address (plist-put address :name (gethash "name" new-info)))
+		(when-let ((owner  (gethash "owner" new-info)))
+		  (setq address (plist-put address :owner owner))))
+	    (setq address (plist-put address :name "unknown")))))
+    address))
 
 (defun panoply-investigate/network-devices (ip-range)
   "Get all ips on your network with IP-RANGE."
-  (mapcar
-   (lambda (host)
-     (panoply--parse-addresses (dom-by-tag host 'address)))
-   (dom-by-tag (panoply-command/nmap "-sn" ip-range) 'host)))
+  (let ((config (panoply-utils/get-config)))
+    (mapcar
+     (lambda (host)
+       (thread-last (dom-by-tag host 'address)
+		    panoply--parse-addresses
+		    (panoply--local-mac-address-lookup config)))
+     (dom-by-tag (panoply-command/nmap "-sn" ip-range) 'host))))
 
 (defun panoply-investigate/network-domain ()
   "Get the domain of the current network."

@@ -17,6 +17,9 @@
 ;;
 
 ;;; Code:
+(require 'cl-macs)
+
+
 (defun panoply-command--run (arg-list)
   "Run ARG-LIST as a command."
   (string-trim (shell-command-to-string (string-join arg-list " "))))
