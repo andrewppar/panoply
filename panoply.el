@@ -24,6 +24,7 @@
     "Minor mode for viewing github items."
   :init-value nil)
 
+;;;###autoload
 (defun panoply/start ()
   "Begin a panoply session."
   (interactive)
@@ -31,12 +32,14 @@
   (panoply-view/device-list)
   (panoply-mode 1))
 
+;;;###autoload
 (defun panoply/refresh-device-list ()
   "Get a device list in a new buffer."
   (interactive)
   (panoply-view/device-list)
   (panoply-mode 1))
 
+;;;###autoload
 (defun panoply/investigate-ip ()
   "Run an investigation against IP, if none is provided use what-s at point."
   (interactive)
