@@ -50,7 +50,7 @@
 	 (ip-collection (mapcar
 			 (lambda (entry) (plist-get entry :ip))
 			 (panoply-view/devices-from-buffer)))
-	 (ip (ivy-completing-read "ip: " ip-collection nil nil ip-guess)))
+	 (ip (completing-read "ip: " ip-collection nil nil ip-guess)))
     (when (panoply-utils/ipv4? ip)
       (panoply-view/investigate-ip (panoply-investigate/ip ip :all))
       (panoply-mode 1))))
