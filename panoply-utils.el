@@ -120,7 +120,7 @@ GROUP-SIZE specifies the expected size of hex-characters in each group."
 			   (point-min) (point-max)))))
 	    (kill-buffer buffer)
 	    (panoply-utils--normalize-configuration result)))
-      (warn (format "No such file: %s" *panoply-utils/config*)))))
+      (error (format "No such file: %s" *panoply-utils/config*)))))
 
 (provide 'panoply-utils)
 ;;; panoply-utils.el ends here
