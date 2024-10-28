@@ -112,16 +112,15 @@ GROUP-SIZE specifies the expected size of hex-characters in each group."
 (defun panoply-utils/get-config ()
   "Get Panoply's configuration."
   (when *panoply-utils/config*
-    (let ((result nil))
-      (save-window-excursion
-	(when (file-exists-p *panoply-utils/config*)
-	  (let ((buffer (find-file *panoply-utils/config*)))
-	    (setq result
-		  (json-parse-string
-		   (buffer-substring-no-properties
-		    (point-min) (point-max))))
-	    (kill-buffer buffer))))
-      (panoply-utils--normalize-configuration result))))
+    (if (file-exists-p *panoply-utils/config*)
+	(save-window-excursion
+	  (let* ((buffer (find-file *panoply-utils/config*))
+		 (result (json-parse-string
+			  (buffer-substring-no-properties
+			   (point-min) (point-max)))))
+	    (kill-buffer buffer)
+	    (panoply-utils--normalize-configuration result)))
+      (warn (format "No such file: %s" *panoply-utils/config*)))))
 
 (provide 'panoply-utils)
 ;;; panoply-utils.el ends here
