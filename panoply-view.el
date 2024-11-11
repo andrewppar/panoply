@@ -73,10 +73,20 @@ Use COLUMN->COLOR-FN to color cells."
     (panoply-view--insert-columns columns column->max)
     (panoply-view--insert-rows rows columns column->max column->color-fn)))
 
+(defun panoply--plist-keys (plist)
+  "Get the keys of PLIST."
+  (let ((key? t)
+	(result '()))
+    (dolist (item plist)
+      (when key?
+	(push item result))
+      (setq key? (not key?)))
+    (reverse result)))
+
 (defun panoply-view--rename-keys (plist rename-plist)
   "Rename the keys in PLIST to the values associated with them in RENAME-PLIST."
   (let ((result '()))
-    (dolist (old-key (plist-keys plist))
+    (dolist (old-key (panoply--plist-keys plist))
       (let ((new-key (or (plist-get rename-plist old-key) old-key)))
 	(setq result (plist-put result new-key (plist-get plist old-key)))))
     result))
@@ -305,7 +315,7 @@ OK-COLOR is used when a name is found.  LOOKUP is the key to look under."
 	  (insert "\n"))
 	(when hostnames
 	  (panoply-view--insert-header "hostnames")
-	  (dolist (key (plist-keys hostnames))
+	  (dolist (key (panoply--plist-keys hostnames))
 	    (let* ((reason (symbol-name key))
 		   (reason-color (cond ((equal reason "reverse-dns") "red")
 				       (t nil))))

@@ -95,6 +95,16 @@
    #'panoply--parse-port
    (dom-by-tag ports 'port)))
 
+(defun panoply--plist-keys (plist)
+  "Get the keys of PLIST."
+  (let ((key? t)
+	(result '()))
+    (dolist (item plist)
+      (when key?
+	(push item result))
+      (setq key? (not key?)))
+    (reverse result)))
+
 (defun panoply--parse-osmatch (osmatch)
   "Parse OSMATCH to plist."
   (let ((result (list :match (dom-attr osmatch 'name)
@@ -110,7 +120,7 @@
 		      :vendor (dom-attr osclass 'vendor)
 		      :family (dom-attr osclass 'osfamily)
 		      :version (dom-attr osclass 'osgen))))))
-    (dolist (key (plist-keys class-guess))
+    (dolist (key (panoply--plist-keys class-guess))
       (unless (equal key :class-accuracy)
 	(let ((val (plist-get class-guess key)))
 	  (setq result (plist-put result key val)))))
